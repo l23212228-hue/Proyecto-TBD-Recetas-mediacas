@@ -83,4 +83,31 @@ FOREIGN KEY (id_receta) REFERENCES recetas(id_receta),
 FOREIGN KEY (id_medicamento) REFERENCES medicamentos(id_medicamento)
 );
 
+```
+
+``` 
+#instalar dependencias
+```
+
+``` 
+npm init -y
+```
+``` 
+install dotenv
+```
+```
+```  
+npm install express nodemon
+```
+``` 
+install mysql2
+```
+``` 
+npm start
+```
+``` 
+npm install pdfkit
+```
+``` 
+npm install multer exceljs
 ``` 
