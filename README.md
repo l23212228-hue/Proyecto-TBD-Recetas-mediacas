@@ -91,23 +91,28 @@ FOREIGN KEY (id_medicamento) REFERENCES medicamentos(id_medicamento)
 
 ``` 
 npm init -y
-```
+
+``` 
 ``` 
 install dotenv
 ```
-```
+
 ```  
 npm install express nodemon
 ```
+
 ``` 
 install mysql2
 ```
+
 ``` 
 npm start
 ```
+
 ``` 
 npm install pdfkit
 ```
+
 ``` 
 npm install multer exceljs
 ``` 
