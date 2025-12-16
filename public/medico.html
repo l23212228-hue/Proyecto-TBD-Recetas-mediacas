@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Médico | Sistema de Recetas</title>
+
+<style>
+/* ================= BASE ================= */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+:root{
+  --amarillo:#f2b705;
+  --amarillo-soft:#fff4cc;
+  --rojo:#8b1e1e;
+  --bg:#f7f7f9;
+  --glass:#ffffff;
+  --borde:rgba(0,0,0,0.08);
+  --texto:#2b2b2b;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  background:var(--bg);
+  color:var(--texto);
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar{
+  width:260px;
+  background:linear-gradient(180deg,var(--amarillo),#ffe28a);
+  padding:2rem 1.5rem;
+}
+
+.logo{
+  display:block;
+  margin:0 auto 2rem;
+  max-width:90px;
+}
+
+.sidebar a{
+  display:block;
+  padding:0.9rem 1rem;
+  border-radius:14px;
+  color:#000;
+  text-decoration:none;
+  font-weight:600;
+  margin-bottom:0.8rem;
+}
+
+.sidebar a.active,
+.sidebar a:hover{
+  background:rgba(255,255,255,0.6);
+}
+
+/* ================= CONTENIDO ================= */
+.content{
+  flex:1;
+  padding:3rem;
+}
+
+/* ================= CAJA ================= */
+.card{
+  max-width:1000px;
+  background:#fff;
+  border-radius:24px;
+  padding:2.8rem;
+  box-shadow:0 20px 50px rgba(0,0,0,0.12);
+}
+
+/* ================= TITULO ================= */
+h1{
+  font-weight:300;
+  letter-spacing:3px;
+  margin-bottom:2rem;
+  text-transform:uppercase;
+  color:var(--rojo);
+}
+
+/* ================= FORM ================= */
+.form-group{
+  margin-bottom:1.6rem;
+}
+
+label{
+  font-size:0.8rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:#555;
+}
+
+input, select, textarea{
+  width:100%;
+  margin-top:0.5rem;
+  padding:0.9rem;
+  border-radius:14px;
+  border:1px solid var(--borde);
+  font-size:0.95rem;
+}
+
+textarea{
+  resize:none;
+  min-height:120px;
+}
+
+/* ================= MEDICAMENTOS ================= */
+.medicamento{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 1fr auto;
+  gap:0.8rem;
+  margin-bottom:0.8rem;
+}
+
+.medicamento input{
+  margin:0;
+}
+
+/* ================= BOTONES ================= */
+.btn{
+  padding:0.9rem 1.6rem;
+  border:none;
+  border-radius:16px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.btn-add{
+  background:var(--amarillo-soft);
+}
+
+.btn-save{
+  background:linear-gradient(135deg,var(--amarillo),#ffd95a);
+  margin-top:2rem;
+}
+
+/* ================= TOAST ================= */
+.toast{
+  position:fixed;
+  bottom:30px;
+  right:30px;
+  padding:1rem 1.5rem;
+  border-radius:18px;
+  background:#2ecc71;
+  color:#fff;
+  font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <img src="logomed.png" class="logo">
+  <a class="active">Redactar receta</a>
+  <a href="/logout">Cerrar sesión</a>
+</div>
+
+
+<!-- CONTENIDO -->
+<div class="content">
+  <div class="card">
+
+    <h1>Nueva receta</h1>
+
+    <div class="form-group">
+      <label>Paciente</label>
+      <select id="paciente"></select>
+    </div>
+
+    <div class="form-group">
+      <label>Diagnóstico</label>
+      <textarea id="diagnostico"></textarea>
+    </div>
+
+    <label>Medicamentos</label>
+    <div id="medicamentos"></div>
+
+    <button class="btn btn-add" onclick="agregarMedicamento()">➕ Agregar medicamento</button>
+
+    <button class="btn btn-save" onclick="guardar()">Guardar receta</button>
+
+  </div>
+</div>
+
+<script>
+const medicamentosDiv=document.getElementById('medicamentos');
+
+fetch('/medico/pacientes')
+.then(r=>r.json())
+.then(data=>{
+  paciente.innerHTML='<option value="">Seleccione paciente</option>';
+  data.forEach(p=>{
+    paciente.innerHTML+=`<option value="${p.id_paciente}">${p.nombre}</option>`;
+  });
+});
+
+function agregarMedicamento(){
+  const div = document.createElement('div');
+  div.className = 'medicamento';
+
+  div.innerHTML = `
+    <input placeholder="Medicamento">
+    <input placeholder="Dosis">
+    <input placeholder="Frecuencia">
+    <input placeholder="Duración">
+    <button type="button"> Eliminar </button>
+  `;
+
+  div.querySelector('button').onclick = () => div.remove();
+  document.getElementById('medicamentos').appendChild(div);
+}
+function guardar(){
+  const meds=[...document.querySelectorAll('.medicamento')].map(m=>{
+    const i=m.querySelectorAll('input');
+    return {nombre:i[0].value,dosis:i[1].value,frecuencia:i[2].value,duracion:i[3].value};
+  });
+
+  fetch('/medico/receta',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      paciente:paciente.value,
+      diagnostico:diagnostico.value,
+      medicamentos:meds
+    })
+  }).then(()=>{
+    const t=document.createElement('div');
+    t.className='toast';
+    t.innerText='Receta guardada correctamente';
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(),3000);
+  });
+}
+</script>
+
+
+</body>
+</html>

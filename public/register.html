@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Registro | Sistema de Recetas Médicas</title>
+
+<style>
+/* MISMO CSS QUE LOGIN */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+:root{
+  --rojo:#8b1e1e;
+  --rojo-oscuro:#5c1414;
+  --amarillo:#f2b705;
+  --blanco-trans:rgba(255,255,255,0.18);
+  --borde:rgba(255,255,255,0.35);
+}
+
+body{
+  height:100vh;
+  background:
+    linear-gradient(135deg, rgba(139,30,30,0.95), rgba(92,20,20,0.95)),
+    url("https://images.unsplash.com/photo-1580281657521-6a27bcbf5a59?auto=format&fit=crop&w=1350&q=80");
+  background-size:cover;
+  background-position:center;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.glass-box{
+  width:100%;
+  max-width:460px;
+  padding:3rem;
+  background:var(--blanco-trans);
+  border:1px solid var(--borde);
+  border-radius:18px;
+  backdrop-filter:blur(18px);
+  box-shadow:0 25px 60px rgba(0,0,0,0.45);
+}
+
+.logo{
+  display:block;
+  margin:0 auto 1.2rem;
+  max-width:90px;
+  opacity:0.75;
+}
+
+h1{
+  text-align:center;
+  color:#fff;
+  font-weight:300;
+  letter-spacing:3px;
+  margin-bottom:2.3rem;
+  text-transform:uppercase;
+}
+
+.form-group{
+  margin-bottom:1.4rem;
+}
+
+label{
+  font-size:0.75rem;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:#f1f1f1;
+}
+
+input,select{
+  width:100%;
+  margin-top:0.4rem;
+  padding:0.85rem;
+  border-radius:10px;
+  border:none;
+  background:rgba(255,255,255,0.85);
+}
+
+button{
+  width:100%;
+  margin-top:1.4rem;
+  padding:0.9rem;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--amarillo),#ffd34d);
+  font-weight:700;
+  letter-spacing:1px;
+  cursor:pointer;
+}
+
+.footer{
+  margin-top:2rem;
+  text-align:center;
+  font-size:0.85rem;
+  color:#f1f1f1;
+}
+
+.footer a{
+  color:var(--amarillo);
+  text-decoration:none;
+  font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<div class="glass-box">
+
+  <img src="logomed.png" class="logo">
+
+  <h1>Registro</h1>
+
+  <form action="/register" method="POST">
+
+    <div class="form-group">
+      <label>Nombre completo</label>
+      <input type="text" name="nombre" required>
+    </div>
+
+    <div class="form-group">
+      <label>Correo electrónico</label>
+      <input type="email" name="email" required>
+    </div>
+
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" name="password" required>
+    </div>
+
+    <div class="form-group">
+      <label>Rol</label>
+      <select name="rol" required>
+        <option value="">Seleccione</option>
+        <option value="admin">Administrador</option>
+        <option value="medico">Médico</option>
+        <option value="farmacia">Farmacia</option>
+        <option value="paciente">Paciente</option>
+      </select>
+    </div>
+
+    <button type="submit">Crear cuenta</button>
+  </form>
+
+  <div class="footer">
+    ¿Ya tienes cuenta? <a href="login.html">Iniciar sesión</a>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Historial de Recetas | Farmacia</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+:root{
+  --blue:#1f4fd8;
+  --blue-soft:#eef3ff;
+  --border:#dbe3ff;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  background:#f4f7ff;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:260px;
+  background:#fff;
+  border-right:1px solid var(--border);
+  padding:2rem 1.5rem;
+}
+
+.logo{
+  display:block;
+  margin:0 auto 2rem;
+  max-width:90px;
+}
+
+.sidebar a{
+  display:block;
+  padding:0.8rem 1rem;
+  border-radius:10px;
+  color:var(--blue);
+  text-decoration:none;
+  font-weight:600;
+  margin-bottom:0.5rem;
+}
+
+.sidebar a.active,
+.sidebar a:hover{
+  background:var(--blue-soft);
+}
+
+/* CONTENT */
+.content{
+  flex:1;
+  padding:3rem;
+}
+
+h1{
+  font-weight:300;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--blue);
+  margin-bottom:1.5rem;
+}
+
+/* SEARCH */
+.search{
+  width:100%;
+  padding:12px 16px;
+  margin-bottom:1.5rem;
+  border-radius:12px;
+  border:1px solid var(--border);
+  font-size:15px;
+  outline:none;
+}
+
+.search:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(31,79,216,.15);
+}
+
+/* BOX */
+.box{
+  background:#fff;
+  border-radius:20px;
+  padding:2rem;
+  box-shadow:0 15px 35px rgba(0,0,0,0.08);
+}
+
+/* TABLE */
+.table-box{
+  border-radius:14px;
+  overflow:hidden;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+thead{
+  background:var(--blue-soft);
+}
+
+th{
+  padding:1rem;
+  font-size:0.75rem;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--blue);
+}
+
+td{
+  padding:0.9rem 1rem;
+  border-bottom:1px solid #e4ebff;
+  font-size:0.9rem;
+}
+
+tr:hover td{
+  background:#f6f9ff;
+}
+
+.pdf{
+  text-decoration:none;
+  font-size:1.2rem;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <img src="logomed.png" class="logo">
+  <a href="/farmacia.html">Gestión Recetas</a>
+  <a class="active">Historial</a>
+  <a href="/logout">Cerrar sesión</a>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <h1>Historial de recetas</h1>
+
+  <input
+    type="text"
+    id="busqueda"
+    class="search"
+    placeholder="Buscar por paciente o médico..."
+  >
+
+  <div class="box">
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Paciente</th>
+            <th>Médico</th>
+            <th>PDF</th>
+          </tr>
+        </thead>
+        <tbody id="historial">
+          <tr>
+            <td colspan="4">Cargando historial...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+let historialCompleto = [];
+const tbody = document.getElementById('historial');
+const buscador = document.getElementById('busqueda');
+
+/* CARGA INICIAL */
+fetch('/farmacia/historial')
+  .then(res => res.json())
+  .then(data => {
+    historialCompleto = data;
+    renderTabla(data);
+  })
+  .catch(() => {
+    tbody.innerHTML =
+      '<tr><td colspan="4">Error al cargar historial</td></tr>';
+  });
+
+/* BÚSQUEDA EN VIVO */
+buscador.addEventListener('input', () => {
+  const texto = buscador.value.toLowerCase();
+
+  const filtrado = historialCompleto.filter(r =>
+    r.paciente.toLowerCase().includes(texto) ||
+    r.medico.toLowerCase().includes(texto)
+  );
+
+  renderTabla(filtrado);
+});
+
+/* RENDER TABLA */
+function renderTabla(data){
+  tbody.innerHTML = '';
+
+  if(data.length === 0){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4">No se encontraron resultados</td>
+      </tr>
+    `;
+    return;
+  }
+
+  data.forEach(r => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${new Date(r.fecha_receta).toLocaleString()}</td>
+        <td>${r.paciente}</td>
+        <td>${r.medico}</td>
+        <td>
+          <a class="pdf" href="/receta/${r.id_receta}/pdf" target="_blank">📄</a>
+        </td>
+      </tr>
+    `;
+  });
+}
+</script>
+
+</body>
+</html>

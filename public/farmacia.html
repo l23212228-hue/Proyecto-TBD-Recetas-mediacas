@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Farmacia | Sistema de Recetas</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+:root{
+  --blue:#1f4fd8;
+  --blue-soft:#eef3ff;
+  --border:#dbe3ff;
+  --ok:#2ecc71;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  background:#f4f7ff;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:260px;
+  background:#fff;
+  border-right:1px solid var(--border);
+  padding:2rem 1.5rem;
+}
+
+.logo{
+  display:block;
+  margin:0 auto 2rem;
+  max-width:90px;
+}
+
+.sidebar a{
+  display:block;
+  padding:0.8rem 1rem;
+  border-radius:10px;
+  color:var(--blue);
+  text-decoration:none;
+  font-weight:600;
+  margin-bottom:0.5rem;
+}
+
+.sidebar a.active,
+.sidebar a:hover{
+  background:var(--blue-soft);
+}
+
+/* CONTENT */
+.content{
+  flex:1;
+  padding:3rem;
+}
+
+.box{
+  background:#fff;
+  border-radius:20px;
+  padding:2.5rem;
+  box-shadow:0 15px 35px rgba(0,0,0,0.08);
+}
+
+h1{
+  font-weight:300;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--blue);
+  margin-bottom:2rem;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1.5rem;
+  margin-bottom:2rem;
+}
+
+.card{
+  background:#fff;
+  border-radius:18px;
+  padding:1.8rem;
+  box-shadow:0 10px 30px rgba(31,79,216,0.15);
+  border-left:6px solid var(--blue);
+}
+
+.card h3{
+  font-size:0.85rem;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:#6c7bd9;
+  margin-bottom:0.6rem;
+}
+
+.card p{
+  font-size:2.2rem;
+  font-weight:700;
+  color:var(--blue);
+}
+
+.card small{
+  font-size:0.9rem;
+  color:#555;
+}
+
+
+/* TABLE */
+.table-box{
+  border-radius:14px;
+  overflow:hidden;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+thead{
+  background:var(--blue-soft);
+}
+
+th{
+  padding:1rem;
+  font-size:0.75rem;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--blue);
+}
+
+td{
+  padding:0.9rem 1rem;
+  border-bottom:1px solid #e4ebff;
+  font-size:0.9rem;
+}
+
+tr:hover td{
+  background:#f6f9ff;
+}
+
+.actions{
+  display:flex;
+  gap:0.6rem;
+}
+
+.btn{
+  border:none;
+  background:none;
+  cursor:pointer;
+  font-size:1.1rem;
+}
+
+.btn.done{ color:var(--ok); }
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <img src="logomed.png" class="logo">
+
+  <a href="/farmacia.html" class="nav-link">
+    Gestión de recetas
+  </a>
+
+  <a href="/historial-farmacia.html" class="nav-link">
+    Historial
+  </a>
+
+  <a href="/logout" class="nav-link logout">
+    Cerrar sesión
+  </a>
+</div>
+
+
+<div class="content">
+  <h1>Estadisticas</h1>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Pendientes</h3>
+      <p id="pendientes">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Entregadas hoy</h3>
+      <p id="hoy">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Total recetas</h3>
+      <p id="total">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Última entrega</h3>
+      <small id="ultima">—</small>
+    </div>
+  </div>
+
+  <input
+  type="text"
+  id="busqueda"
+  placeholder="Buscar paciente o médico..."
+  style="
+    width:100%;
+    padding:12px 16px;
+    margin-bottom:1rem;
+    border-radius:12px;
+    border:1px solid #dbe3ff;
+    font-size:1rem;
+  "
+>
+
+  <!-- AQUÍ SIGUE TU TABLA DE RECETAS -->
+  <div class="box" style="margin-top:2rem">
+    <h1>Recetas pendientes</h1>
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Médico</th>
+            <th>Fecha</th>
+            <th>Acciones</th> 
+          </tr>
+        </thead>
+        <tbody id="tabla-recetas"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<script>
+fetch('/farmacia/recetas')
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.getElementById('tabla-recetas');
+    tbody.innerHTML = '';
+
+    data.forEach(r => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${r.nombre_paciente}</td>
+          <td>${r.nombre_medico}</td>
+          <td>${new Date(r.fecha_receta).toLocaleString()}</td>
+          <td class="actions">
+          <a class="btn" href="/receta/${r.id_receta}/pdf" target="_blank">📄</a>
+            <button class="btn done" onclick="entregar(${r.id_receta})">✔</button>
+          </td>
+        </tr>
+      `;
+    });
+  });
+
+function entregar(id){
+  fetch('/farmacia/entregar/' + id, { method:'POST' })
+    .then(() => location.reload());
+}
+</script>
+<script>
+fetch('/farmacia/dashboard')
+  .then(res => {
+    if (!res.ok) {
+      throw new Error('No autorizado o sesión expirada');
+    }
+    return res.json();
+  })
+  .then(d => {
+    console.log('Dashboard farmacia:', d); // 👈 CLAVE
+
+    document.getElementById('pendientes').textContent = d.pendientes ?? 0;
+    document.getElementById('hoy').textContent = d.entregadas_hoy ?? 0;
+    document.getElementById('total').textContent = d.total ?? 0;
+
+    document.getElementById('ultima').textContent =
+      d.ultima_entrega
+        ? new Date(d.ultima_entrega).toLocaleString()
+        : 'Sin registros';
+  })
+  .catch(err => {
+    console.error('Error dashboard farmacia:', err);
+  });
+</script>
+<script>
+const input = document.getElementById('busqueda');
+const tbody = document.getElementById('tabla-recetas');
+
+input.addEventListener('input', () => {
+  fetch('/farmacia/recetas/buscar?q=' + input.value)
+    .then(res => res.json())
+    .then(data => {
+      tbody.innerHTML = '';
+
+      if (data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4">Sin resultados</td>
+          </tr>`;
+        return;
+      }
+
+      data.forEach(r => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${r.nombre_paciente}</td>
+            <td>${r.nombre_medico}</td>
+            <td>${new Date(r.fecha_receta).toLocaleString()}</td>
+            <td class="actions">
+              <a class="btn" href="/receta/${r.id_receta}/pdf" target="_blank">📄</a>
+              <button class="btn done" onclick="entregar(${r.id_receta})">✔</button>
+            </td>
+          </tr>
+        `;
+      });
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Paciente | Mis Recetas</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+:root{
+  --verde:#1e8f5a;
+  --verde-soft:#e9f8f0;
+  --borde:#cceedd;
+  --bg:#f4fbf7;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  background:var(--bg);
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:260px;
+  background:#fff;
+  border-right:1px solid var(--borde);
+  padding:2rem 1.5rem;
+}
+
+.logo{
+  display:block;
+  margin:0 auto 2rem;
+  max-width:90px;
+}
+
+.sidebar a{
+  display:block;
+  padding:0.9rem 1rem;
+  border-radius:12px;
+  color:var(--verde);
+  text-decoration:none;
+  font-weight:600;
+  margin-bottom:0.6rem;
+}
+
+.sidebar a.active,
+.sidebar a:hover{
+  background:var(--verde-soft);
+}
+
+/* CONTENT */
+.content{
+  flex:1;
+  padding:3rem;
+}
+
+.box{
+  background:#fff;
+  border-radius:20px;
+  padding:2.5rem;
+  box-shadow:0 15px 35px rgba(0,0,0,0.08);
+}
+
+h1{
+  font-weight:300;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--verde);
+  margin-bottom:2rem;
+}
+
+/* TABLE */
+.table-container{
+  max-height:420px;
+  overflow-y:auto;
+  border-radius:14px;
+  border:1px solid var(--borde);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+thead{
+  background:var(--verde-soft);
+  position:sticky;
+  top:0;
+}
+
+th{
+  padding:1rem;
+  font-size:0.75rem;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--verde);
+}
+
+td{
+  padding:0.9rem 1rem;
+  border-bottom:1px solid var(--borde);
+  font-size:0.9rem;
+}
+
+tr:hover td{
+  background:#f2fff8;
+}
+
+.estado{
+  font-weight:700;
+  text-transform:uppercase;
+  font-size:0.75rem;
+}
+
+.estado.pendiente{ color:#f39c12; }
+.estado.entregada{ color:#2ecc71; }
+
+.btn{
+  text-decoration:none;
+  font-size:1.2rem;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <img src="logomed.png" class="logo">
+
+  <a href="/paciente.html" class="nav-link">Inicio</a>
+  <a href="/perfil.html" class="nav-link">Mi perfil</a>
+  <a href="/mis-recetas.html" class="nav-link">Mis recetas</a>
+  <a href="/historial.html" class="nav-link">Historial</a>
+  <a href="/logout" class="nav-link logout">Cerrar sesión</a>
+</div>
+
+
+<div class="content">
+  <div class="box">
+    <h1>Mis recetas</h1>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Médico</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>PDF</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-recetas"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+fetch('/paciente/recetas')
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.getElementById('tabla-recetas');
+    tbody.innerHTML = '';
+
+    data.forEach(r => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${r.medico}</td>
+          <td>${new Date(r.fecha_receta).toLocaleString()}</td>
+          <td class="estado ${r.estado}">${r.estado}</td>
+          <td>
+           <a href="/receta/${r.id_receta}/pdf" target="_blank">📄</a>
+          </td>
+        </tr>
+      `;
+    });
+  });
+</script>
+
+</body>
+</html>

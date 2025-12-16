@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Historial Médico</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+:root{
+  --verde:#1e8f5a;
+  --verde-soft:#e9f8f0;
+  --borde:#cceedd;
+  --bg:#f4fbf7;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  background:var(--bg);
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:260px;
+  background:#fff;
+  border-right:1px solid var(--borde);
+  padding:2rem 1.5rem;
+}
+
+.logo{
+  display:block;
+  margin:0 auto 2rem;
+  max-width:90px;
+}
+
+.sidebar a{
+  display:block;
+  padding:0.9rem 1rem;
+  border-radius:12px;
+  color:var(--verde);
+  text-decoration:none;
+  font-weight:600;
+  margin-bottom:0.6rem;
+}
+
+.sidebar a:hover,
+.sidebar a.active{
+  background:var(--verde-soft);
+}
+
+.sidebar a.logout{
+  margin-top:2rem;
+  color:#1e9a81;
+}
+
+/* CONTENT */
+.content{
+  flex:1;
+  padding:3rem;
+}
+
+/* HEADER */
+h1{
+  font-weight:300;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--verde);
+  margin-bottom:2rem;
+}
+
+/* CARD */
+.card{
+  background:#fff;
+  padding:2rem;
+  border-radius:20px;
+  box-shadow:0 15px 35px rgba(0,0,0,0.08);
+}
+
+/* TABLE */
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:1.5rem;
+}
+
+th, td{
+  padding:12px;
+  border-bottom:1px solid #e0e0e0;
+}
+
+th{
+  background:var(--verde);
+  color:white;
+  text-align:left;
+}
+
+tr:nth-child(even){
+  background:#f7fffb;
+}
+
+/* BADGES */
+.badge{
+  padding:4px 12px;
+  border-radius:12px;
+  font-size:12px;
+  color:white;
+  text-transform:capitalize;
+}
+
+.pendiente{ background:#f39c12; }
+.entregada{ background:#27ae60; }
+
+/* BTN */
+.btn{
+  display:inline-block;
+  margin-top:2rem;
+  background:var(--verde);
+  color:white;
+  padding:10px 20px;
+  border-radius:10px;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <img src="logomed.png" class="logo">
+
+  <a href="/paciente.html" class="nav-link">Inicio</a>
+  <a href="/perfil.html" class="nav-link">Mi perfil</a>
+  <a href="/mis-recetas.html" class="nav-link">Mis recetas</a>
+  <a href="/historial.html" class="nav-link active">Historial</a>
+  <a href="/logout" class="nav-link logout">Cerrar sesión</a>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <h1>Historial médico</h1>
+
+  <div class="card">
+    <h2>Antecedentes</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Médico</th>
+          <th>Diagnóstico</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="historial">
+        <tr>
+          <td colspan="4">Cargando historial...</td>
+        </tr>
+      </tbody>
+    </table>
+
+
+  </div>
+</div>
+
+<script>
+/* ACTIVO EN MENU */
+const links = document.querySelectorAll('.nav-link');
+const current = window.location.pathname;
+links.forEach(l=>{
+  if(l.getAttribute('href') === current){
+    l.classList.add('active');
+  }
+});
+
+/* HISTORIAL */
+fetch('/paciente/historial')
+  .then(res => res.json())
+  .then(data => {
+
+    const tbody = document.getElementById('historial');
+    tbody.innerHTML = '';
+
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="4">No hay historial médico</td></tr>';
+      return;
+    }
+
+    data.forEach(r => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${new Date(r.fecha_receta).toLocaleDateString()}</td>
+          <td>${r.medico}</td>
+          <td>${r.diagnostico}</td>
+          <td>
+            <span class="badge ${r.estado}">
+              ${r.estado}
+            </span>
+          </td>
+        </tr>
+      `;
+    });
+  })
+  .catch(()=>{
+    document.getElementById('historial').innerHTML =
+      '<tr><td colspan="4">Error al cargar historial</td></tr>';
+  });
+</script>
+
+</body>
+</html>

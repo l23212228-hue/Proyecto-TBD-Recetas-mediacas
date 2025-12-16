@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Admin | Sistema de Recetas</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
+}
+
+:root{
+  --rojo:#8b1e1e;
+  --amarillo:#f2b705;
+  --bg:#f6f7f9;
+  --glass:#ffffff;
+  --borde:rgba(0,0,0,0.08);
+  --texto:#2b2b2b;
+}
+
+body{
+  min-height:100vh;
+  background:var(--bg);
+  display:flex;
+}
+
+.sidebar{
+  width:260px;
+  background:var(--glass);
+  border-right:1px solid var(--borde);
+  padding:2rem 1.5rem;
+}
+
+.logo{
+  display:block;
+  margin:0 auto 2rem;
+  max-width:90px;
+}
+
+.sidebar a{
+  display:block;
+  padding:0.8rem 1rem;
+  border-radius:12px;
+  text-decoration:none;
+  color:var(--texto);
+  margin-bottom:0.6rem;
+}
+
+.sidebar a.active{
+  background:rgba(139,30,30,0.1);
+  color:var(--rojo);
+}
+
+.content{
+  flex:1;
+  padding:3rem;
+}
+
+.box{
+  background:var(--glass);
+  border-radius:22px;
+  padding:2.5rem;
+  margin-bottom:2.5rem;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:1.2rem;
+}
+
+h1{
+  font-weight:300;
+  letter-spacing:3px;
+  color:var(--rojo);
+}
+
+.btn{
+  padding:0.6rem 1.2rem;
+  border:none;
+  border-radius:14px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.btn-export{
+  background:#2ecc71;
+  color:#fff;
+}
+
+.btn-import{
+  background:var(--amarillo);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:0.8rem;
+  border-bottom:1px solid #e0e0e0;
+}
+
+th{
+  font-size:0.75rem;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:#666;
+}
+
+.actions button{
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:1.1rem;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <img src="logomed.png" class="logo">
+  <a class="active">Administración</a>
+  <a href="/logout">Cerrar sesión</a>
+</div>
+
+<div class="content">
+
+  <!-- USUARIOS -->
+  <div class="box">
+    <div class="header">
+      <h1>Usuarios</h1>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th> Acion</th>
+        </tr>
+      </thead>
+      <tbody id="tablaUsuarios"></tbody>
+    </table>
+  </div>
+
+  <!-- MEDICAMENTOS -->
+  <div class="box">
+    <div class="header">
+      <h1>Medicamentos</h1>
+      <div>
+        <button class="btn btn-export" onclick="exportarMedicamentos()">📤 Exportar Excel</button>
+        <label class="btn btn-import">
+          📥 Importar Excel
+          <input type="file" id="excel" hidden onchange="importarMedicamentos()">
+        </label>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody id="tablaMedicamentos"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+// ========= USUARIOS =========
+fetch('/admin/usuarios')
+.then(r=>r.json())
+.then(data=>{
+  tablaUsuarios.innerHTML='';
+  data.forEach(u=>{
+    tablaUsuarios.innerHTML+=`
+      <tr>
+        <td>${u.id_usuario}</td>
+        <td>${u.nombre}</td>
+        <td>${u.email}</td>
+        <td>${u.rol}</td>
+ <td class="actions">
+  <button onclick='abrirEditar(${JSON.stringify(u)})'>✏️</button>
+  <button onclick="eliminarUsuario(${u.id_usuario})">🗑️</button>
+</td>
+
+      </tr>
+    `;
+  });
+});
+
+function eliminarUsuario(id){
+  if(confirm('¿Eliminar usuario?')){
+    fetch('/admin/usuarios/eliminar',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id_usuario:id})
+    }).then(r=>{
+  if(!r.ok) return r.text().then(t=>alert(t));
+  location.reload();
+});
+
+  }
+}
+
+// ========= MEDICAMENTOS =========
+function cargarMedicamentos(){
+  fetch('/admin/medicamentos')
+  .then(r=>r.json())
+  .then(data=>{
+    tablaMedicamentos.innerHTML='';
+    data.forEach(m=>{
+      tablaMedicamentos.innerHTML+=`
+        <tr>
+          <td>${m.id_medicamento}</td>
+          <td>${m.nombre}</td>
+        </tr>
+      `;
+    });
+  });
+}
+
+cargarMedicamentos();
+
+function exportarMedicamentos(){
+  window.location='/admin/medicamentos/excel';
+}
+
+function importarMedicamentos(){
+  const file=document.getElementById('excel').files[0];
+  const form=new FormData();
+  form.append('excel',file);
+
+  fetch('/admin/medicamentos/importar',{
+    method:'POST',
+    body:form
+  })
+  .then(()=>cargarMedicamentos());
+}
+
+
+function abrirEditar(u){
+  document.getElementById('modalEditar').style.display='flex';
+  edit_id.value = u.id_usuario;
+  edit_nombre.value = u.nombre;
+  edit_email.value = u.email;
+  edit_rol.value = u.rol;
+}
+
+function guardarEdicion(){
+  fetch('/admin/usuarios/actualizar',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      id_usuario: edit_id.value,
+      nombre: edit_nombre.value,
+      email: edit_email.value,
+      rol: edit_rol.value
+    })
+  })
+  .then(r=>{
+    if(!r.ok) return alert('Error al actualizar');
+    location.reload();
+  });
+}
+
+// cerrar modal al dar clic afuera
+modalEditar.onclick = e => {
+  if(e.target === modalEditar){
+    modalEditar.style.display='none';
+  }
+}
+
+</script>
+<!-- MODAL EDITAR USUARIO -->
+<div id="modalEditar" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  justify-content:center;
+  align-items:center;
+">
+  <div style="
+    background:#fff;
+    padding:2rem;
+    border-radius:16px;
+    width:100%;
+    max-width:380px;
+  ">
+    <h2 style="color:#8b1e1e;margin-bottom:1rem">Editar usuario</h2>
+
+    <input type="hidden" id="edit_id">
+
+    <input id="edit_nombre" placeholder="Nombre" style="width:100%;margin-bottom:.6rem;padding:.5rem">
+    <input id="edit_email" placeholder="Email" style="width:100%;margin-bottom:.6rem;padding:.5rem">
+
+    <select id="edit_rol" style="width:100%;margin-bottom:1rem;padding:.5rem">
+      <option value="admin">Admin</option>
+      <option value="medico">Médico</option>
+      <option value="farmacia">Farmacia</option>
+      <option value="paciente">Paciente</option>
+    </select>
+
+    <button onclick="guardarEdicion()" style="
+      width:100%;
+      padding:.7rem;
+      background:#f2b705;
+      border:none;
+      border-radius:12px;
+      font-weight:700;
+      cursor:pointer;
+    ">
+      Guardar cambios
+    </button>
+  </div>
+</div>
+
+</body>
+</html>
