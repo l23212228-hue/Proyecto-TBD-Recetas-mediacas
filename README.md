@@ -1,4 +1,4 @@
-# Proyecto TBD – Sistema de Gestión de Recetas Médicas
+# Proyecto TBD – Sistema de Gestión de Recetas Médicas- Reyes Zamudio Mariant
 
 Sistema web para la gestión integral de recetas médicas con diferentes roles: administrador, médico, farmacia y paciente.  
 Permite la creación, administración y seguimiento de recetas médicas de forma digital.
